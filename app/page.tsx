@@ -89,6 +89,12 @@ export default async function Home() {
                   See How It Works
                 </a>
               </div>
+              <div className="mt-5 inline-flex rounded-full bg-gradient-to-r from-blue-500/40 via-purple-500/40 to-blue-500/40 p-[1px] shadow-sm shadow-blue-500/10">
+                <div className="rounded-full bg-white/90 px-4 py-1.5 text-sm font-medium text-slate-700 backdrop-blur">
+                  Built by{" "}
+                  <span className="font-semibold text-slate-900">Rohit Oak</span>
+                </div>
+              </div>
               <p className="mt-4 text-sm text-slate-500">
                 No credit card required · Free ATS analysis
               </p>
@@ -459,12 +465,13 @@ export default async function Home() {
                   <span className="font-medium text-slate-300">Rohit Oak</span>
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
-                  AI Builder | Product Management Aspirant | Technology Leader
+                  18+ Years in Enterprise Software | Building AI-Powered Products
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <a
                   href="#"
+                  title="LinkedIn placeholder"
                   aria-label="Rohit Oak on LinkedIn"
                   className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 text-slate-400 transition-colors hover:border-slate-600 hover:bg-slate-800 hover:text-white"
                 >
@@ -474,6 +481,7 @@ export default async function Home() {
                 </a>
                 <a
                   href="#"
+                  title="GitHub placeholder"
                   aria-label="Rohit Oak on GitHub"
                   className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 text-slate-400 transition-colors hover:border-slate-600 hover:bg-slate-800 hover:text-white"
                 >
