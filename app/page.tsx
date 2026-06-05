@@ -465,7 +465,7 @@ export default async function Home() {
                   <span className="font-medium text-slate-300">Rohit Oak</span>
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
-                  18+ Years in Enterprise Software | Building AI-Powered Products
+                  Enterprise Technology Leader | Building AI-Powered Products
                 </p>
               </div>
               <div className="flex items-center gap-3">
