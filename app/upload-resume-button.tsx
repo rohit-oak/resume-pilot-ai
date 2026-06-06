@@ -46,6 +46,7 @@ export function UploadResumeButton() {
         });
 
       if (uploadError) {
+        console.error("Resume upload failed during Storage upload", uploadError);
         throw uploadError;
       }
 
@@ -56,6 +57,7 @@ export function UploadResumeButton() {
       });
 
       if (insertError) {
+        console.error("Resume upload failed during database insert", insertError);
         throw insertError;
       }
 
