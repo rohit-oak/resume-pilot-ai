@@ -1,4 +1,5 @@
 import { createServerClient } from "@/lib/supabase";
+import { UploadResumeButton } from "./upload-resume-button";
 
 type Resume = {
   id: string;
@@ -154,6 +155,8 @@ export default async function Home() {
                 All resumes stored in your account, ready to tailor for any job.
               </p>
             </div>
+
+            <UploadResumeButton />
 
             {error ? (
               <div className="mx-auto mt-12 max-w-lg rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-700">
