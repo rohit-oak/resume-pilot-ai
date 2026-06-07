@@ -1,4 +1,5 @@
 import { createServerClient } from "@/lib/supabase";
+import { DeleteResumeButton } from "./delete-resume-button";
 import { UploadResumeButton } from "./upload-resume-button";
 
 type Resume = {
@@ -212,6 +213,11 @@ export default async function Home() {
                       >
                         View
                       </a>
+                      <DeleteResumeButton
+                        resumeId={resume.id}
+                        fileName={resume.file_name}
+                        resumeName={resume.name}
+                      />
                     </article>
                   );
                 })}
