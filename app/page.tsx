@@ -1,4 +1,5 @@
 import { createServerClient } from "@/lib/supabase";
+import { AtsMatchScore } from "./ats-match-score";
 import { DeleteResumeButton } from "./delete-resume-button";
 import { JobDescriptionAnalyzer } from "./job-description-analyzer";
 import { UploadResumeButton } from "./upload-resume-button";
@@ -15,6 +16,11 @@ export default async function Home() {
     .from("resumes")
     .select("id, name, file_name")
     .order("name");
+  const resumeOptions = ((resumes || []) as Resume[]).map((resume) => ({
+    id: resume.id,
+    name: resume.name,
+    file_name: resume.file_name,
+  }));
 
   return (
     <div className="min-h-full bg-slate-50 text-slate-900">
@@ -228,6 +234,8 @@ export default async function Home() {
         </section>
 
         <JobDescriptionAnalyzer />
+
+        <AtsMatchScore resumes={resumeOptions} />
 
         {/* Features */}
         <section id="features" className="border-t border-slate-200 bg-white px-6 py-20 md:py-28">

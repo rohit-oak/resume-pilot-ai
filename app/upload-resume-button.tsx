@@ -11,6 +11,31 @@ export function UploadResumeButton() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  async function parseResume(file: File) {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/parse-resume", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = (await response.json()) as {
+        parsedText?: string;
+      };
+
+      if (!response.ok) {
+        return "";
+      }
+
+      return result.parsedText || "";
+    } catch (reason) {
+      console.error("Resume parsing failed during upload", reason);
+      return "";
+    }
+  }
+
   async function uploadResume(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 
@@ -50,9 +75,12 @@ export function UploadResumeButton() {
         throw uploadError;
       }
 
+      const parsedText = await parseResume(file);
+
       const { error: insertError } = await supabase.from("resumes").insert({
         name: resumeName,
         file_name: storagePath,
+        parsed_text: parsedText,
         created_at: new Date().toISOString(),
       });
 
