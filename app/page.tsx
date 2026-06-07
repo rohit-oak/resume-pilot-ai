@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase";
 import { DeleteResumeButton } from "./delete-resume-button";
+import { JobDescriptionAnalyzer } from "./job-description-analyzer";
 import { UploadResumeButton } from "./upload-resume-button";
 
 type Resume = {
@@ -225,6 +226,8 @@ export default async function Home() {
             )}
           </div>
         </section>
+
+        <JobDescriptionAnalyzer />
 
         {/* Features */}
         <section id="features" className="border-t border-slate-200 bg-white px-6 py-20 md:py-28">
