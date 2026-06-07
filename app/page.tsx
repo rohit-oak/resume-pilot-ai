@@ -177,30 +177,44 @@ export default async function Home() {
               </div>
             ) : (
               <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {(resumes as Resume[]).map((resume) => (
-                  <article
-                    key={resume.id}
-                    className="group rounded-2xl border border-slate-200 bg-slate-50 p-6 transition-all hover:border-blue-200 hover:bg-white hover:shadow-lg hover:shadow-blue-500/5"
-                  >
-                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 text-white transition-transform group-hover:scale-105">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-semibold text-slate-900">
-                      {resume.name}
-                    </h3>
-                    <p className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">
-                      Resume Name
-                    </p>
-                    <div className="mt-4 rounded-lg border border-slate-200 bg-white px-3 py-2">
-                      <p className="truncate text-sm font-medium text-slate-700">
-                        {resume.file_name}
+                {(resumes as Resume[]).map((resume) => {
+                  const {
+                    data: { publicUrl },
+                  } = supabase.storage.from("resumes").getPublicUrl(resume.file_name);
+
+                  return (
+                    <article
+                      key={resume.id}
+                      className="group rounded-2xl border border-slate-200 bg-slate-50 p-6 transition-all hover:border-blue-200 hover:bg-white hover:shadow-lg hover:shadow-blue-500/5"
+                    >
+                      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 text-white transition-transform group-hover:scale-105">
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        {resume.name}
+                      </h3>
+                      <p className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                        Resume Name
                       </p>
-                      <p className="mt-0.5 text-xs text-slate-500">File Name</p>
-                    </div>
-                  </article>
-                ))}
+                      <div className="mt-4 rounded-lg border border-slate-200 bg-white px-3 py-2">
+                        <p className="truncate text-sm font-medium text-slate-700">
+                          {resume.file_name}
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500">File Name</p>
+                      </div>
+                      <a
+                        href={publicUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-4 inline-flex w-full items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50"
+                      >
+                        View
+                      </a>
+                    </article>
+                  );
+                })}
               </div>
             )}
           </div>

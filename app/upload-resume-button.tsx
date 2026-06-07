@@ -35,7 +35,7 @@ export function UploadResumeButton() {
     try {
       const supabase = createBrowserSupabaseClient();
       const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, "-");
-      const storagePath = `${Date.now()}-${safeFileName}`;
+      const storagePath = safeFileName;
       const resumeName = file.name.replace(/\.pdf$/i, "").trim() || "Untitled Resume";
 
       const { error: uploadError } = await supabase.storage
@@ -52,7 +52,7 @@ export function UploadResumeButton() {
 
       const { error: insertError } = await supabase.from("resumes").insert({
         name: resumeName,
-        file_name: file.name,
+        file_name: storagePath,
         created_at: new Date().toISOString(),
       });
 
