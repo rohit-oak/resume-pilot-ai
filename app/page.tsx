@@ -2,6 +2,7 @@ import { createServerClient } from "@/lib/supabase";
 import { AtsMatchScore } from "./ats-match-score";
 import { DeleteResumeButton } from "./delete-resume-button";
 import { JobDescriptionAnalyzer } from "./job-description-analyzer";
+import { ResumeCustomizer } from "./resume-customizer";
 import { UploadResumeButton } from "./upload-resume-button";
 
 type Resume = {
@@ -222,7 +223,6 @@ export default async function Home() {
                       </a>
                       <DeleteResumeButton
                         resumeId={resume.id}
-                        fileName={resume.file_name}
                         resumeName={resume.name}
                       />
                     </article>
@@ -236,6 +236,8 @@ export default async function Home() {
         <JobDescriptionAnalyzer />
 
         <AtsMatchScore resumes={resumeOptions} />
+
+        <ResumeCustomizer resumes={resumeOptions} />
 
         {/* Features */}
         <section id="features" className="border-t border-slate-200 bg-white px-6 py-20 md:py-28">

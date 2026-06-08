@@ -13,6 +13,12 @@ export function UploadResumeButton() {
 
   async function parseResume(file: File) {
     try {
+      console.log("[ResumePilot][upload] Calling parse API", {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      });
+
       const formData = new FormData();
       formData.append("file", file);
 
@@ -23,7 +29,16 @@ export function UploadResumeButton() {
 
       const result = (await response.json()) as {
         parsedText?: string;
+        parseError?: string;
+        error?: string;
       };
+
+      console.log("[ResumePilot][upload] Parse API response", {
+        ok: response.ok,
+        status: response.status,
+        parsedTextLength: result.parsedText?.length || 0,
+        parseError: result.parseError || result.error || null,
+      });
 
       if (!response.ok) {
         return "";
@@ -63,6 +78,13 @@ export function UploadResumeButton() {
       const storagePath = safeFileName;
       const resumeName = file.name.replace(/\.pdf$/i, "").trim() || "Untitled Resume";
 
+      console.log("[ResumePilot][upload] Starting resume upload", {
+        originalFileName: file.name,
+        storagePath,
+        resumeName,
+        size: file.size,
+      });
+
       const { error: uploadError } = await supabase.storage
         .from("resumes")
         .upload(storagePath, file, {
@@ -75,19 +97,39 @@ export function UploadResumeButton() {
         throw uploadError;
       }
 
+      console.log("[ResumePilot][upload] Storage upload succeeded", {
+        storagePath,
+      });
+
       const parsedText = await parseResume(file);
 
-      const { error: insertError } = await supabase.from("resumes").insert({
+      console.log("[ResumePilot][upload] Inserting resume row", {
         name: resumeName,
         file_name: storagePath,
-        parsed_text: parsedText,
-        created_at: new Date().toISOString(),
+        parsedTextLength: parsedText.length,
+        hasParsedText: parsedText.length > 0,
       });
+
+      const { data: insertedResume, error: insertError } = await supabase
+        .from("resumes")
+        .insert({
+          name: resumeName,
+          file_name: storagePath,
+          parsed_text: parsedText,
+          created_at: new Date().toISOString(),
+        })
+        .select("id, parsed_text")
+        .single();
 
       if (insertError) {
         console.error("Resume upload failed during database insert", insertError);
         throw insertError;
       }
+
+      console.log("[ResumePilot][upload] Database insert succeeded", {
+        id: insertedResume?.id,
+        storedParsedTextLength: insertedResume?.parsed_text?.length || 0,
+      });
 
       setMessage("Resume uploaded successfully.");
       router.refresh();

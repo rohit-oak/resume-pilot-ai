@@ -2,17 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createBrowserSupabaseClient } from "@/lib/supabase-browser";
 
 type DeleteResumeButtonProps = {
   resumeId: string;
-  fileName: string;
   resumeName: string;
 };
 
 export function DeleteResumeButton({
   resumeId,
-  fileName,
   resumeName,
 }: DeleteResumeButtonProps) {
   const router = useRouter();
@@ -35,23 +32,24 @@ export function DeleteResumeButton({
     setError(null);
 
     try {
-      const supabase = createBrowserSupabaseClient();
+      const response = await fetch("/api/delete-resume", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ resumeId }),
+      });
+      const payload = (await response.json()) as {
+        error?: string;
+        details?: string;
+      };
 
-      const { error: storageError } = await supabase.storage
-        .from("resumes")
-        .remove([fileName]);
-
-      if (storageError) {
-        throw storageError;
-      }
-
-      const { error: deleteError } = await supabase
-        .from("resumes")
-        .delete()
-        .eq("id", resumeId);
-
-      if (deleteError) {
-        throw deleteError;
+      if (!response.ok) {
+        throw new Error(
+          payload.details
+            ? `${payload.error} ${payload.details}`
+            : payload.error || "Unable to delete resume.",
+        );
       }
 
       setMessage("Resume deleted successfully.");

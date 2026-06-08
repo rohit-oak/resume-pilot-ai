@@ -45,6 +45,15 @@ const analysisSchema = {
   ],
 };
 
+const customizedResumeSchema = {
+  type: "OBJECT",
+  properties: {
+    tailoredResumeText: { type: "STRING" },
+    tailoringSummary: { type: "ARRAY", items: { type: "STRING" } },
+  },
+  required: ["tailoredResumeText", "tailoringSummary"],
+};
+
 function asStringArray(value: unknown) {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
@@ -67,7 +76,11 @@ function normalizeAnalysis(value: unknown): JobDescriptionAnalysis {
 }
 
 function normalizeTerm(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9+#.\s-]/g, " ").replace(/\s+/g, " ").trim();
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9+#.\s-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function uniqueTerms(terms: string[]) {
@@ -92,11 +105,7 @@ function termExistsInResume(resumeText: string, term: string) {
   const normalizedResume = normalizeTerm(resumeText);
   const normalizedTerm = normalizeTerm(term);
 
-  if (!normalizedTerm) {
-    return false;
-  }
-
-  return normalizedResume.includes(normalizedTerm);
+  return Boolean(normalizedTerm && normalizedResume.includes(normalizedTerm));
 }
 
 function scoreTerms(resumeText: string, terms: string[]) {
@@ -111,7 +120,7 @@ function scoreTerms(resumeText: string, terms: string[]) {
   };
 }
 
-async function callGemini(prompt: string, responseSchema?: object) {
+async function callGemini(prompt: string, responseSchema: object) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
@@ -135,9 +144,9 @@ async function callGemini(prompt: string, responseSchema?: object) {
           },
         ],
         generationConfig: {
-          temperature: 0.2,
+          temperature: 0.25,
           response_mime_type: "application/json",
-          ...(responseSchema ? { response_schema: responseSchema } : {}),
+          response_schema: responseSchema,
         },
       }),
     },
@@ -166,7 +175,7 @@ async function callGemini(prompt: string, responseSchema?: object) {
 async function analyzeJobDescription(jobDescription: string) {
   const response = await callGemini(
     [
-      "Analyze this job description for resume ATS matching.",
+      "Analyze this job description for resume customization.",
       "Return only JSON matching the provided schema.",
       "Keep skills and keywords concise, specific, and deduplicated.",
       "",
@@ -178,45 +187,92 @@ async function analyzeJobDescription(jobDescription: string) {
   return normalizeAnalysis(response);
 }
 
-async function getRecommendations({
-  roleTitle,
+function calculateAtsMatch(resumeText: string, analysis: JobDescriptionAnalysis) {
+  const required = scoreTerms(resumeText, analysis.requiredSkills);
+  const preferred = scoreTerms(resumeText, analysis.preferredSkills);
+  const keywords = scoreTerms(resumeText, analysis.keywords);
+  const weightedTotal =
+    required.total * 0.55 + preferred.total * 0.2 + keywords.total * 0.25;
+  const weightedMatched =
+    required.matched.length * 0.55 +
+    preferred.matched.length * 0.2 +
+    keywords.matched.length * 0.25;
+  const overallScore =
+    weightedTotal > 0 ? Math.round((weightedMatched / weightedTotal) * 100) : 0;
+
+  return {
+    overallScore,
+    matchedSkills: uniqueTerms([
+      ...required.matched,
+      ...preferred.matched,
+      ...keywords.matched,
+    ]),
+    missingSkills: uniqueTerms([
+      ...required.missing,
+      ...preferred.missing,
+      ...keywords.missing,
+    ]),
+  };
+}
+
+function normalizeCustomizedResume(value: unknown) {
+  const record =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+
+  return {
+    tailoredResumeText:
+      typeof record.tailoredResumeText === "string"
+        ? record.tailoredResumeText.trim()
+        : "",
+    tailoringSummary: asStringArray(record.tailoringSummary).slice(0, 5),
+  };
+}
+
+async function customizeResume({
+  resumeText,
+  analysis,
   overallScore,
   matchedSkills,
   missingSkills,
 }: {
-  roleTitle: string;
+  resumeText: string;
+  analysis: JobDescriptionAnalysis;
   overallScore: number;
   matchedSkills: string[];
   missingSkills: string[];
 }) {
   const response = await callGemini(
     [
-      "Create concise resume improvement recommendations based on this ATS match result.",
-      "Return JSON only with a recommendations array of 3 to 5 strings.",
+      "Create an ATS-friendly customized resume from the provided parsed resume text.",
+      "Preserve factual experience. Do not invent employers, titles, dates, degrees, certifications, tools, metrics, or responsibilities that are not supported by the resume text.",
+      "Improve keyword coverage only where the resume text supports it.",
+      "Highlight relevant skills and experience for the target job description.",
+      "Use clean plain-text resume formatting with clear section headings and concise bullets.",
+      "Return only JSON matching the provided schema.",
       "",
-      `Role title: ${roleTitle}`,
-      `Overall match score: ${overallScore}`,
+      `Target role: ${analysis.roleTitle}`,
+      `ATS match score: ${overallScore}`,
+      `Required skills: ${analysis.requiredSkills.join(", ") || "None"}`,
+      `Preferred skills: ${analysis.preferredSkills.join(", ") || "None"}`,
+      `Keywords: ${analysis.keywords.join(", ") || "None"}`,
+      `Experience requirements: ${analysis.experienceRequirements.join("; ") || "None"}`,
+      `Responsibilities: ${analysis.responsibilities.join("; ") || "None"}`,
       `Matched skills: ${matchedSkills.join(", ") || "None"}`,
       `Missing skills: ${missingSkills.join(", ") || "None"}`,
+      "",
+      "Parsed resume text:",
+      resumeText,
     ].join("\n"),
-    {
-      type: "OBJECT",
-      properties: {
-        recommendations: {
-          type: "ARRAY",
-          items: { type: "STRING" },
-        },
-      },
-      required: ["recommendations"],
-    },
+    customizedResumeSchema,
   );
 
-  const record =
-    response && typeof response === "object"
-      ? (response as Record<string, unknown>)
-      : {};
+  const customized = normalizeCustomizedResume(response);
 
-  return asStringArray(record.recommendations).slice(0, 5);
+  if (!customized.tailoredResumeText) {
+    throw new Error("Gemini returned an empty customized resume.");
+  }
+
+  return customized;
 }
 
 export async function POST(request: Request) {
@@ -228,11 +284,6 @@ export async function POST(request: Request) {
     const resumeId = body?.resumeId?.trim();
     const jobDescription = body?.jobDescription?.trim();
 
-    console.log("[ResumePilot][ats-match] Score request received", {
-      resumeId,
-      jobDescriptionLength: jobDescription?.length || 0,
-    });
-
     if (!resumeId) {
       return NextResponse.json(
         { error: "Resume selection is required." },
@@ -243,6 +294,16 @@ export async function POST(request: Request) {
     if (!jobDescription) {
       return NextResponse.json(
         { error: "Job description is required." },
+        { status: 400 },
+      );
+    }
+
+    if (jobDescription.length > 20000) {
+      return NextResponse.json(
+        {
+          error:
+            "Job description is too long. Please keep it under 20,000 characters.",
+        },
         { status: 400 },
       );
     }
@@ -264,19 +325,7 @@ export async function POST(request: Request) {
     const resumeText =
       typeof resume.parsed_text === "string" ? resume.parsed_text : "";
 
-    console.log("[ResumePilot][ats-match] Resume loaded", {
-      resumeId: resume.id,
-      resumeName: resume.name,
-      parsedTextLength: resumeText.length,
-      hasParsedText: resumeText.trim().length > 0,
-    });
-
     if (!resumeText.trim()) {
-      console.error("[ResumePilot][ats-match] Selected resume has empty parsed_text", {
-        resumeId: resume.id,
-        resumeName: resume.name,
-      });
-
       return NextResponse.json(
         { error: "Selected resume does not have parsed text yet." },
         { status: 400 },
@@ -284,45 +333,29 @@ export async function POST(request: Request) {
     }
 
     const analysis = await analyzeJobDescription(jobDescription);
-    const required = scoreTerms(resumeText, analysis.requiredSkills);
-    const preferred = scoreTerms(resumeText, analysis.preferredSkills);
-    const keywords = scoreTerms(resumeText, analysis.keywords);
-
-    const weightedTotal =
-      required.total * 0.55 + preferred.total * 0.2 + keywords.total * 0.25;
-    const weightedMatched =
-      required.matched.length * 0.55 +
-      preferred.matched.length * 0.2 +
-      keywords.matched.length * 0.25;
-    const overallScore =
-      weightedTotal > 0 ? Math.round((weightedMatched / weightedTotal) * 100) : 0;
-    const matchedSkills = uniqueTerms([
-      ...required.matched,
-      ...preferred.matched,
-      ...keywords.matched,
-    ]);
-    const missingSkills = uniqueTerms([
-      ...required.missing,
-      ...preferred.missing,
-      ...keywords.missing,
-    ]);
-    const recommendations = await getRecommendations({
-      roleTitle: analysis.roleTitle,
-      overallScore,
-      matchedSkills,
-      missingSkills,
+    const match = calculateAtsMatch(resumeText, analysis);
+    const customized = await customizeResume({
+      resumeText,
+      analysis,
+      overallScore: match.overallScore,
+      matchedSkills: match.matchedSkills,
+      missingSkills: match.missingSkills,
     });
 
     return NextResponse.json({
+      resumeName: resume.name,
       roleTitle: analysis.roleTitle,
-      overallScore,
-      matchedSkills,
-      missingSkills,
-      recommendations,
+      overallScore: match.overallScore,
+      matchedSkills: match.matchedSkills,
+      missingSkills: match.missingSkills,
+      tailoredResumeText: customized.tailoredResumeText,
+      tailoringSummary: customized.tailoringSummary,
     });
   } catch (reason) {
     const message =
-      reason instanceof Error ? reason.message : "Unable to calculate ATS score.";
+      reason instanceof Error
+        ? reason.message
+        : "Unable to customize resume.";
 
     return NextResponse.json({ error: message }, { status: 500 });
   }
