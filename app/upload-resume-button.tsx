@@ -74,8 +74,17 @@ export function UploadResumeButton() {
 
     try {
       const supabase = createBrowserSupabaseClient();
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        throw new Error("Sign in before uploading resumes.");
+      }
+
       const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, "-");
-      const storagePath = safeFileName;
+      const storagePath = `${user.id}/${Date.now()}-${safeFileName}`;
       const resumeName = file.name.replace(/\.pdf$/i, "").trim() || "Untitled Resume";
 
       console.log("[ResumePilot][upload] Starting resume upload", {
@@ -115,6 +124,7 @@ export function UploadResumeButton() {
         .insert({
           name: resumeName,
           file_name: storagePath,
+          user_id: user.id,
           parsed_text: parsedText,
           created_at: new Date().toISOString(),
         })
@@ -156,7 +166,7 @@ export function UploadResumeButton() {
         type="button"
         disabled={isUploading}
         onClick={() => fileInputRef.current?.click()}
-        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/25 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+        className="inline-flex items-center gap-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[rgba(68,55,66,0.22)] transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-[rgba(68,55,66,0.24)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
       >
         <svg
           className="h-4 w-4"
@@ -174,7 +184,7 @@ export function UploadResumeButton() {
         </svg>
         {isUploading ? "Uploading..." : "Upload Resume"}
       </button>
-      {message ? <p className="text-sm font-medium text-emerald-700">{message}</p> : null}
+      {message ? <p className="text-sm font-medium text-[var(--brand-success)]">{message}</p> : null}
       {error ? <p className="text-sm font-medium text-red-700">{error}</p> : null}
     </div>
   );

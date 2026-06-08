@@ -248,10 +248,22 @@ export async function POST(request: Request) {
     }
 
     const supabase = await createServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 },
+      );
+    }
+
     const { data: resume, error: resumeError } = await supabase
       .from("resumes")
       .select("id, name, parsed_text")
       .eq("id", resumeId)
+      .eq("user_id", user.id)
       .single();
 
     if (resumeError || !resume) {

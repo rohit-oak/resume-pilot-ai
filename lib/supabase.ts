@@ -3,6 +3,7 @@ import {
   createServerClient as createSupabaseServerClient,
 } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import type { NextRequest, NextResponse } from "next/server";
 
 function getSupabaseEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -48,7 +49,7 @@ export async function createServerClient() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet, _headers) {
+      setAll(cookiesToSet) {
         try {
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options);
@@ -57,6 +58,24 @@ export async function createServerClient() {
           // Server Components cannot set cookies.
           // Session refresh is handled by middleware/proxy when configured.
         }
+      },
+    },
+  });
+}
+
+export function createProxyClient(request: NextRequest, response: NextResponse) {
+  const { url, key } = getSupabaseEnv();
+
+  return createSupabaseServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
       },
     },
   });

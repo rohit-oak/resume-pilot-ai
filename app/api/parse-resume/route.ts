@@ -1,10 +1,23 @@
 import { NextResponse } from "next/server";
 import pdfParse from "pdf-parse/lib/pdf-parse.js";
+import { createServerClient } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { parsedText: "", error: "Authentication required." },
+        { status: 401 },
+      );
+    }
+
     console.log("===== PARSE ROUTE HIT =====");
     console.log("[ResumePilot][parse-resume] Parse request received");
 

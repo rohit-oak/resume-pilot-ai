@@ -77,63 +77,64 @@ export function JobDescriptionAnalyzer() {
   return (
     <section
       id="job-description-analyzer"
-      className="border-t border-slate-200 bg-slate-50 px-6 py-20 md:py-28"
+      className="border-t border-slate-200 bg-white px-6 py-16 md:py-20"
     >
       <div className="mx-auto max-w-6xl">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-              Job Description Analyzer
-            </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
-              Extract the signals that matter
-            </h2>
-            <p className="mt-4 text-lg leading-relaxed text-slate-600">
-              Paste a job description and ResumePilot AI will identify the role,
-              skills, keywords, experience needs, and responsibilities to guide
-              resume tailoring.
-            </p>
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-primary)]">
+            Job Description Analyzer
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+            Extract the signals that matter
+          </h2>
+          <p className="mt-4 text-lg leading-relaxed text-slate-600">
+            Paste a job description and ResumePilot AI will identify the role,
+            skills, keywords, experience needs, and responsibilities to guide
+            resume tailoring.
+          </p>
+        </div>
 
-            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <label
-                htmlFor="job-description"
-                className="text-sm font-semibold text-slate-800"
-              >
-                Job Description
-              </label>
-              <textarea
-                id="job-description"
-                value={jobDescription}
-                onChange={(event) => setJobDescription(event.target.value)}
-                rows={12}
-                placeholder="Paste the full job description here..."
-                className="mt-3 min-h-72 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100"
-              />
-              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-slate-500">
-                  {jobDescription.trim().length.toLocaleString()} characters
-                </p>
-                <button
-                  type="button"
-                  disabled={isAnalyzing}
-                  onClick={analyzeJobDescription}
-                  className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/25 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
-                >
-                  {isAnalyzing ? "Analyzing..." : "Analyze JD"}
-                </button>
-              </div>
-              {message ? (
-                <p className="mt-3 text-sm font-medium text-emerald-700">
-                  {message}
-                </p>
-              ) : null}
-              {error ? (
-                <p className="mt-3 text-sm font-medium text-red-700">{error}</p>
-              ) : null}
+        <div className="mt-12 flex flex-col items-start gap-8 lg:flex-row">
+          <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:w-[45%]">
+            <label
+              htmlFor="job-description"
+              className="text-sm font-semibold text-slate-800"
+            >
+              Job Description
+            </label>
+            <textarea
+              id="job-description"
+              value={jobDescription}
+              onChange={(event) => setJobDescription(event.target.value)}
+              rows={12}
+              placeholder="Paste the full job description here..."
+              className="mt-3 min-h-72 w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-[var(--brand-accent)] focus:ring-4 focus:ring-[var(--brand-accent-muted)]"
+            />
+            <button
+              type="button"
+              disabled={isAnalyzing}
+              onClick={analyzeJobDescription}
+              className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[rgba(68,55,66,0.22)] transition-all hover:scale-[1.01] hover:shadow-xl hover:shadow-[rgba(68,55,66,0.24)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+            >
+              {isAnalyzing ? "Analyzing..." : "Analyze JD"}
+            </button>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-slate-500">
+                {jobDescription.trim().length.toLocaleString()} characters
+              </p>
+              <p className="text-xs text-slate-500">Step 1 of 3</p>
             </div>
+            {message ? (
+              <p className="mt-3 text-sm font-medium text-[var(--brand-success)]">
+                {message}
+              </p>
+            ) : null}
+            {error ? (
+              <p className="mt-3 text-sm font-medium text-red-700">{error}</p>
+            ) : null}
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:w-[55%]">
             {hasAnalysis ? (
               <div className="space-y-4">
                 <AnalysisCard title="Role Title" items={[analysis.roleTitle]} />
@@ -150,38 +151,44 @@ export function JobDescriptionAnalyzer() {
                 />
               </div>
             ) : (
-              <div className="flex min-h-[520px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                <div>
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 text-blue-600">
-                    <svg
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.6}
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                      />
-                    </svg>
-                  </div>
-                  <p className="font-semibold text-slate-900">
-                    Analysis results will appear here
-                  </p>
-                  <p className="mt-2 max-w-sm text-sm leading-6 text-slate-600">
-                    Paste a job description and run the analyzer to see structured
-                    hiring signals.
-                  </p>
-                </div>
-              </div>
+              <SkeletonResultPanel title="JD analysis preview" />
             )}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function SkeletonResultPanel({ title }: { title: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-5">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div>
+          <p className="text-sm font-semibold text-slate-900">{title}</p>
+          <p className="mt-1 text-xs text-slate-500">
+            Results populate here after analysis.
+          </p>
+        </div>
+        <div className="h-9 w-9 rounded-lg bg-[var(--brand-accent-muted)]" />
+      </div>
+      <div className="mt-5 space-y-4">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+          <div className="h-3 w-28 rounded-full bg-slate-200" />
+          <div className="mt-4 h-4 w-3/4 rounded-full bg-slate-100" />
+        </div>
+        {[0, 1, 2, 3].map((item) => (
+          <div key={item} className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+            <div className="h-3 w-32 rounded-full bg-slate-200" />
+            <div className="mt-4 flex flex-wrap gap-2">
+              <div className="h-7 w-24 rounded-full bg-slate-100" />
+              <div className="h-7 w-32 rounded-full bg-slate-100" />
+              <div className="h-7 w-20 rounded-full bg-slate-100" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

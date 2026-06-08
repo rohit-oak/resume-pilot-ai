@@ -2,8 +2,12 @@ import { createServerClient } from "@/lib/supabase";
 import { AtsMatchScore } from "./ats-match-score";
 import { DeleteResumeButton } from "./delete-resume-button";
 import { JobDescriptionAnalyzer } from "./job-description-analyzer";
+import { LogoutButton } from "./logout-button";
 import { ResumeCustomizer } from "./resume-customizer";
 import { UploadResumeButton } from "./upload-resume-button";
+import { ViewResumeButton } from "./view-resume-button";
+import { WorkflowOverview } from "./workflow-overview";
+import { redirect } from "next/navigation";
 
 type Resume = {
   id: string;
@@ -13,9 +17,18 @@ type Resume = {
 
 export default async function Home() {
   const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   const { data: resumes, error } = await supabase
     .from("resumes")
     .select("id, name, file_name")
+    .eq("user_id", user.id)
     .order("name");
   const resumeOptions = ((resumes || []) as Resume[]).map((resume) => ({
     id: resume.id,
@@ -24,38 +37,39 @@ export default async function Home() {
   }));
 
   return (
-    <div className="min-h-full bg-slate-50 text-slate-900">
+    <div className="min-h-full bg-[var(--background)] text-slate-900">
       {/* Navigation */}
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <a href="#" className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 text-sm font-bold text-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--brand-primary)] text-sm font-bold text-white">
               RP
             </span>
             <span className="text-lg font-semibold tracking-tight">
-              ResumePilot <span className="text-blue-600">AI</span>
+              ResumePilot <span className="text-[var(--brand-primary)]">AI</span>
             </span>
           </a>
           <div className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
-            <a href="#features" className="transition-colors hover:text-blue-600">
+            <a href="#features" className="transition-colors hover:text-[var(--brand-primary)]">
               Features
             </a>
-            <a href="#how-it-works" className="transition-colors hover:text-blue-600">
+            <a href="#how-it-works" className="transition-colors hover:text-[var(--brand-primary)]">
               How It Works
             </a>
-            <a href="#benefits" className="transition-colors hover:text-blue-600">
+            <a href="#benefits" className="transition-colors hover:text-[var(--brand-primary)]">
               Benefits
             </a>
-            <a href="#resumes" className="transition-colors hover:text-blue-600">
+            <a href="#resumes" className="transition-colors hover:text-[var(--brand-primary)]">
               Resumes
             </a>
           </div>
           <a
             href="#cta"
-            className="rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-500/25 transition-all hover:shadow-lg hover:shadow-purple-500/30"
+            className="rounded-lg bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] px-4 py-2 text-sm font-semibold text-white shadow-md shadow-[rgba(68,55,66,0.22)] transition-all hover:shadow-lg hover:shadow-[rgba(68,55,66,0.24)]"
           >
             Get Started
           </a>
+          <LogoutButton />
         </nav>
       </header>
 
@@ -63,19 +77,19 @@ export default async function Home() {
         {/* Hero */}
         <section className="relative overflow-hidden px-6 pb-20 pt-16 md:pb-28 md:pt-24">
           <div className="pointer-events-none absolute inset-0 -z-10">
-            <div className="absolute -top-24 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-400/20 via-purple-400/15 to-transparent blur-3xl" />
-            <div className="absolute right-0 top-1/3 h-72 w-72 rounded-full bg-purple-400/10 blur-3xl" />
+            <div className="absolute -top-24 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-[var(--brand-accent-muted)] blur-3xl" />
+            <div className="absolute right-0 top-1/3 h-72 w-72 rounded-full bg-[var(--brand-accent-muted)] blur-3xl" />
           </div>
 
           <div className="mx-auto max-w-6xl">
             <div className="mx-auto max-w-3xl text-center">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700">
-                <span className="h-2 w-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500" />
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--brand-accent)] bg-white px-4 py-1.5 text-sm font-medium text-slate-600 shadow-sm">
+                <span className="h-2 w-2 rounded-full bg-[var(--brand-accent)]" />
                 AI-powered resume tailoring
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl md:text-6xl">
                 Land more interviews with{" "}
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="font-extrabold text-slate-900">
                   tailored resumes
                 </span>
               </h1>
@@ -88,18 +102,18 @@ export default async function Home() {
                 <a
                   id="cta"
                   href="#"
-                  className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 text-center text-base font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/30 sm:w-auto"
+                  className="w-full rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] px-8 py-3.5 text-center text-base font-semibold text-white shadow-lg shadow-[rgba(68,55,66,0.28)] transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-[rgba(68,55,66,0.24)] sm:w-auto"
                 >
                   Start Tailoring Free
                 </a>
                 <a
                   href="#how-it-works"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-8 py-3.5 text-center text-base font-semibold text-slate-700 transition-colors hover:border-blue-300 hover:text-blue-600 sm:w-auto"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-8 py-3.5 text-center text-base font-semibold text-slate-700 transition-colors hover:border-[var(--brand-accent)] hover:text-[var(--brand-primary)] sm:w-auto"
                 >
                   See How It Works
                 </a>
               </div>
-              <div className="mt-5 inline-flex rounded-full bg-gradient-to-r from-blue-500/40 via-purple-500/40 to-blue-500/40 p-[1px] shadow-sm shadow-blue-500/10">
+              <div className="mt-5 inline-flex rounded-full bg-[var(--brand-accent)] p-[1px] shadow-sm shadow-[rgba(68,55,66,0.10)]">
                 <div className="rounded-full bg-white/90 px-4 py-1.5 text-sm font-medium text-slate-700 backdrop-blur">
                   Built by{" "}
                   <span className="font-semibold text-slate-900">Rohit Oak</span>
@@ -116,7 +130,7 @@ export default async function Home() {
                 <div className="rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 p-6 md:p-8">
                   <div className="mb-6 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500" />
+                      <div className="h-10 w-10 rounded-lg border border-[var(--brand-accent)] bg-[var(--brand-accent-muted)]" />
                       <div>
                         <p className="text-sm font-semibold text-slate-800">
                           Senior Product Manager
@@ -124,7 +138,7 @@ export default async function Home() {
                         <p className="text-xs text-slate-500">Acme Corp · Remote</p>
                       </div>
                     </div>
-                    <div className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
+                    <div className="rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-[var(--brand-success)]">
                       92% ATS Match
                     </div>
                   </div>
@@ -133,13 +147,13 @@ export default async function Home() {
                     <div className="h-3 w-full rounded-full bg-slate-200" />
                     <div className="h-3 w-5/6 rounded-full bg-slate-200" />
                     <div className="mt-4 flex gap-2">
-                      <span className="rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
+                      <span className="rounded-md bg-[var(--brand-accent-muted)] px-2 py-1 text-xs font-medium text-[var(--brand-primary)]">
                         Product Strategy
                       </span>
-                      <span className="rounded-md bg-purple-100 px-2 py-1 text-xs font-medium text-purple-700">
+                      <span className="rounded-md bg-[var(--brand-accent-muted)] px-2 py-1 text-xs font-medium text-[var(--brand-primary)]">
                         Agile
                       </span>
-                      <span className="rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
+                      <span className="rounded-md bg-[var(--brand-accent-muted)] px-2 py-1 text-xs font-medium text-[var(--brand-primary)]">
                         Stakeholder Mgmt
                       </span>
                     </div>
@@ -151,12 +165,12 @@ export default async function Home() {
         </section>
 
         {/* Resumes */}
-        <section id="resumes" className="border-t border-slate-200 bg-white px-6 py-20 md:py-28">
+        <section id="resumes" className="border-t border-slate-200 bg-slate-50 px-6 py-16 md:py-20">
           <div className="mx-auto max-w-6xl">
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
                 Your{" "}
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-[var(--brand-primary)]">
                   Resumes
                 </span>
               </h2>
@@ -174,8 +188,8 @@ export default async function Home() {
               </div>
             ) : !resumes?.length ? (
               <div className="mx-auto mt-12 max-w-lg rounded-xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100">
-                  <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-accent-muted)]">
+                  <svg className="h-6 w-6 text-[var(--brand-primary)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                   </svg>
                 </div>
@@ -186,17 +200,12 @@ export default async function Home() {
               </div>
             ) : (
               <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {(resumes as Resume[]).map((resume) => {
-                  const {
-                    data: { publicUrl },
-                  } = supabase.storage.from("resumes").getPublicUrl(resume.file_name);
-
-                  return (
+                {(resumes as Resume[]).map((resume) => (
                     <article
                       key={resume.id}
-                      className="group rounded-2xl border border-slate-200 bg-slate-50 p-6 transition-all hover:border-blue-200 hover:bg-white hover:shadow-lg hover:shadow-blue-500/5"
+                      className="group rounded-2xl border border-slate-200 bg-slate-50 p-6 transition-all hover:border-[var(--brand-accent)] hover:bg-white hover:shadow-lg hover:shadow-[rgba(68,55,66,0.08)]"
                     >
-                      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 text-white transition-transform group-hover:scale-105">
+                      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--brand-primary)] text-white transition-transform group-hover:scale-105">
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                         </svg>
@@ -213,25 +222,19 @@ export default async function Home() {
                         </p>
                         <p className="mt-0.5 text-xs text-slate-500">File Name</p>
                       </div>
-                      <a
-                        href={publicUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-4 inline-flex w-full items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50"
-                      >
-                        View
-                      </a>
+                      <ViewResumeButton resumeId={resume.id} />
                       <DeleteResumeButton
                         resumeId={resume.id}
                         resumeName={resume.name}
                       />
                     </article>
-                  );
-                })}
+                ))}
               </div>
             )}
           </div>
         </section>
+
+        <WorkflowOverview />
 
         <JobDescriptionAnalyzer />
 
@@ -245,7 +248,7 @@ export default async function Home() {
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
                 Everything you need to{" "}
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-[var(--brand-primary)]">
                   stand out
                 </span>
               </h2>
@@ -309,7 +312,7 @@ export default async function Home() {
             </div>
 
             <div className="relative mt-16 grid gap-12 md:grid-cols-3 md:gap-8">
-              <div className="pointer-events-none absolute top-16 hidden h-0.5 w-full bg-gradient-to-r from-blue-200 via-purple-200 to-blue-200 md:block" />
+              <div className="pointer-events-none absolute top-16 hidden h-0.5 w-full bg-gradient-to-r from-[var(--brand-accent)] via-[var(--brand-border)] to-[var(--brand-accent)] md:block" />
 
               <StepCard
                 step={1}
@@ -337,7 +340,7 @@ export default async function Home() {
               <div>
                 <h2 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
                   Why job seekers choose{" "}
-                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  <span className="text-[var(--brand-primary)]">
                     ResumePilot AI
                   </span>
                 </h2>
@@ -367,7 +370,7 @@ export default async function Home() {
               </div>
 
               <div className="relative">
-                <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 blur-2xl" />
+                <div className="absolute -inset-4 rounded-3xl bg-[var(--brand-accent-muted)] blur-2xl" />
                 <div className="relative rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-8 shadow-xl">
                   <div className="space-y-6">
                     <div className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm">
@@ -377,7 +380,7 @@ export default async function Home() {
                         </p>
                         <p className="text-3xl font-bold text-slate-900">87%</p>
                       </div>
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white">
                         <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                         </svg>
@@ -411,18 +414,18 @@ export default async function Home() {
         {/* CTA Banner */}
         <section className="px-6 pb-20 md:pb-28">
           <div className="mx-auto max-w-6xl">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-16 text-center shadow-2xl shadow-blue-500/30 md:px-16">
+            <div className="relative overflow-hidden rounded-3xl bg-[var(--brand-primary)] px-8 py-16 text-center shadow-2xl shadow-[rgba(68,55,66,0.28)] md:px-16">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_50%)]" />
               <h2 className="relative text-3xl font-bold text-white md:text-4xl">
                 Ready to land your dream job?
               </h2>
-              <p className="relative mx-auto mt-4 max-w-xl text-lg text-blue-100">
+              <p className="relative mx-auto mt-4 max-w-xl text-lg text-[var(--brand-accent-muted)]">
                 Join thousands of job seekers who use ResumePilot AI to craft
                 winning resumes for every application.
               </p>
               <a
                 href="#"
-                className="relative mt-8 inline-block rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-blue-600 shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl"
+                className="relative mt-8 inline-block rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-[var(--brand-primary)] shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl"
               >
                 Get Started for Free
               </a>
@@ -437,7 +440,7 @@ export default async function Home() {
           <div className="flex flex-col items-center justify-between gap-8 md:flex-row md:items-start">
             <div className="text-center md:text-left">
               <a href="#" className="flex items-center justify-center gap-2 md:justify-start">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 text-xs font-bold text-white">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--brand-primary)] text-xs font-bold text-white">
                   RP
                 </span>
                 <span className="text-lg font-semibold text-white">
@@ -548,8 +551,8 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="group rounded-2xl border border-slate-200 bg-slate-50 p-8 transition-all hover:border-blue-200 hover:bg-white hover:shadow-lg hover:shadow-blue-500/5">
-      <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 text-white transition-transform group-hover:scale-110">
+    <div className="group rounded-2xl border border-slate-200 bg-slate-50 p-8 transition-all hover:border-[var(--brand-accent)] hover:bg-white hover:shadow-lg hover:shadow-[rgba(68,55,66,0.08)]">
+      <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--brand-primary)] text-white transition-transform group-hover:scale-110">
         {icon}
       </div>
       <h3 className="text-xl font-semibold text-slate-900">{title}</h3>
@@ -569,7 +572,7 @@ function StepCard({
 }) {
   return (
     <div className="relative text-center">
-      <div className="relative z-10 mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-purple-600 text-xl font-bold text-white shadow-lg shadow-blue-500/30">
+      <div className="relative z-10 mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand-primary)] text-xl font-bold text-white shadow-lg shadow-[rgba(68,55,66,0.28)]">
         {step}
       </div>
       <h3 className="text-xl font-semibold text-slate-900">{title}</h3>
@@ -589,7 +592,7 @@ function BenefitItem({
 }) {
   return (
     <li className="flex gap-4">
-      <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500">
+      <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--brand-primary)]">
         <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
         </svg>

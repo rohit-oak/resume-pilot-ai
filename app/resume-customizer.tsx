@@ -77,11 +77,11 @@ export function ResumeCustomizer({ resumes }: { resumes: ResumeOption[] }) {
   return (
     <section
       id="resume-customizer"
-      className="border-t border-slate-200 bg-slate-50 px-6 py-20 md:py-28"
+      className="border-t border-slate-200 bg-white px-6 py-16 md:py-20"
     >
       <div className="mx-auto max-w-6xl">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
+          <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-primary)]">
             Resume Customizer
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
@@ -93,8 +93,8 @@ export function ResumeCustomizer({ resumes }: { resumes: ResumeOption[] }) {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="mt-12 flex flex-col items-start gap-8 lg:flex-row">
+          <div className="w-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:w-[45%]">
             <label
               htmlFor="customizer-resume"
               className="text-sm font-semibold text-slate-800"
@@ -105,7 +105,7 @@ export function ResumeCustomizer({ resumes }: { resumes: ResumeOption[] }) {
               id="customizer-resume"
               value={selectedResumeId}
               onChange={(event) => setSelectedResumeId(event.target.value)}
-              className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition-colors focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100"
+              className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition-colors focus:border-[var(--brand-accent)] focus:bg-white focus:ring-4 focus:ring-[var(--brand-accent-muted)]"
             >
               {resumes.length ? (
                 resumes.map((resume) => (
@@ -130,7 +130,7 @@ export function ResumeCustomizer({ resumes }: { resumes: ResumeOption[] }) {
               onChange={(event) => setJobDescription(event.target.value)}
               rows={13}
               placeholder="Paste the target job description here..."
-              className="mt-3 min-h-72 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100"
+              className="mt-3 min-h-72 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-[var(--brand-accent)] focus:bg-white focus:ring-4 focus:ring-[var(--brand-accent-muted)]"
             />
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -141,7 +141,7 @@ export function ResumeCustomizer({ resumes }: { resumes: ResumeOption[] }) {
                 type="button"
                 disabled={isGenerating || !resumes.length}
                 onClick={generateCustomizedResume}
-                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/25 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+                className="inline-flex items-center justify-center rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[rgba(68,55,66,0.22)] transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-[rgba(68,55,66,0.24)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
               >
                 {isGenerating
                   ? "Generating..."
@@ -150,7 +150,7 @@ export function ResumeCustomizer({ resumes }: { resumes: ResumeOption[] }) {
             </div>
 
             {message ? (
-              <p className="mt-3 text-sm font-medium text-emerald-700">
+              <p className="mt-3 text-sm font-medium text-[var(--brand-success)]">
                 {message}
               </p>
             ) : null}
@@ -159,7 +159,7 @@ export function ResumeCustomizer({ resumes }: { resumes: ResumeOption[] }) {
             ) : null}
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="w-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:w-[55%]">
             {result ? (
               <div className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -200,49 +200,67 @@ export function ResumeCustomizer({ resumes }: { resumes: ResumeOption[] }) {
                       onClick={() =>
                         navigator.clipboard.writeText(result.tailoredResumeText)
                       }
-                      className="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50"
+                      className="inline-flex items-center justify-center rounded-lg border border-[var(--brand-accent)] bg-white px-3 py-2 text-sm font-semibold text-[var(--brand-primary)] transition-colors hover:border-[var(--brand-accent)] hover:bg-[var(--brand-accent-muted)]"
                     >
                       Copy Text
                     </button>
                   </div>
-                  <pre className="mt-4 max-h-[640px] whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-800">
-                    {result.tailoredResumeText}
-                  </pre>
+                  <textarea
+                    readOnly
+                    value={result.tailoredResumeText}
+                    className="mt-4 h-[500px] max-h-[500px] min-h-80 w-full resize-none overflow-y-auto rounded-xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-800 outline-none whitespace-pre-wrap break-words"
+                  />
                 </article>
               </div>
             ) : (
-              <div className="flex min-h-[620px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                <div>
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 text-blue-600">
-                    <svg
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.6}
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"
-                      />
-                    </svg>
-                  </div>
-                  <p className="font-semibold text-slate-900">
-                    Customized resume will appear here
-                  </p>
-                  <p className="mt-2 max-w-sm text-sm leading-6 text-slate-600">
-                    Generate a tailored draft after selecting a resume and adding
-                    the target job description.
-                  </p>
-                </div>
-              </div>
+              <SkeletonCustomizerPanel />
             )}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function SkeletonCustomizerPanel() {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="h-3 w-24 rounded-full bg-slate-200" />
+          <div className="mt-4 h-8 w-36 rounded-lg bg-slate-100" />
+          <div className="mt-3 h-3 w-28 rounded-full bg-slate-100" />
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="h-3 w-24 rounded-full bg-slate-200" />
+          <div className="mt-4 h-8 w-24 rounded-lg bg-slate-100" />
+          <div className="mt-3 h-3 w-32 rounded-full bg-slate-100" />
+        </div>
+      </div>
+      <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5">
+        <div className="h-3 w-36 rounded-full bg-slate-200" />
+        <div className="mt-4 space-y-3">
+          <div className="h-3 w-full rounded-full bg-slate-100" />
+          <div className="h-3 w-11/12 rounded-full bg-slate-100" />
+          <div className="h-3 w-4/5 rounded-full bg-slate-100" />
+        </div>
+      </div>
+      <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5">
+        <div className="flex items-center justify-between">
+          <div className="h-3 w-40 rounded-full bg-slate-200" />
+          <div className="h-9 w-24 rounded-lg bg-[var(--brand-accent-muted)]" />
+        </div>
+        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="space-y-3">
+            <div className="h-3 w-1/2 rounded-full bg-slate-200" />
+            <div className="h-3 w-full rounded-full bg-slate-100" />
+            <div className="h-3 w-10/12 rounded-full bg-slate-100" />
+            <div className="h-3 w-11/12 rounded-full bg-slate-100" />
+            <div className="h-3 w-3/4 rounded-full bg-slate-100" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -280,8 +298,8 @@ function ChipCard({
   const visibleItems = items.length ? items : ["None found"];
   const toneClassName =
     tone === "success"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-      : "border-amber-200 bg-amber-50 text-amber-800";
+      ? "border-green-200 bg-green-50 text-[var(--brand-success)]"
+      : "border-orange-200 bg-orange-50 text-[var(--brand-warning)]";
 
   return (
     <article className="rounded-xl border border-slate-200 bg-slate-50 p-5">

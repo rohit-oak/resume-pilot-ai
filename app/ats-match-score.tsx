@@ -73,11 +73,11 @@ export function AtsMatchScore({ resumes }: { resumes: ResumeOption[] }) {
   return (
     <section
       id="ats-match-score"
-      className="border-t border-slate-200 bg-white px-6 py-20 md:py-28"
+      className="border-t border-slate-200 bg-slate-50 px-6 py-16 md:py-20"
     >
       <div className="mx-auto max-w-6xl">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
+          <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-primary)]">
             ATS Match Score
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
@@ -101,7 +101,7 @@ export function AtsMatchScore({ resumes }: { resumes: ResumeOption[] }) {
               id="ats-resume"
               value={selectedResumeId}
               onChange={(event) => setSelectedResumeId(event.target.value)}
-              className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none transition-colors focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+              className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none transition-colors focus:border-[var(--brand-accent)] focus:ring-4 focus:ring-[var(--brand-accent-muted)]"
             >
               {resumes.length ? (
                 resumes.map((resume) => (
@@ -126,20 +126,20 @@ export function AtsMatchScore({ resumes }: { resumes: ResumeOption[] }) {
               onChange={(event) => setJobDescription(event.target.value)}
               rows={13}
               placeholder="Paste the target job description here..."
-              className="mt-3 min-h-72 w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+              className="mt-3 min-h-72 w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-[var(--brand-accent)] focus:ring-4 focus:ring-[var(--brand-accent-muted)]"
             />
 
             <button
               type="button"
               disabled={isScoring || !resumes.length}
               onClick={calculateScore}
-              className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.01] hover:shadow-xl hover:shadow-purple-500/25 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+              className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[rgba(68,55,66,0.22)] transition-all hover:scale-[1.01] hover:shadow-xl hover:shadow-[rgba(68,55,66,0.24)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
             >
               {isScoring ? "Calculating..." : "Calculate Match Score"}
             </button>
 
             {message ? (
-              <p className="mt-3 text-sm font-medium text-emerald-700">
+              <p className="mt-3 text-sm font-medium text-[var(--brand-success)]">
                 {message}
               </p>
             ) : null}
@@ -183,38 +183,39 @@ export function AtsMatchScore({ resumes }: { resumes: ResumeOption[] }) {
                 />
               </div>
             ) : (
-              <div className="flex min-h-[560px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
-                <div>
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 text-blue-600">
-                    <svg
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.6}
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"
-                      />
-                    </svg>
-                  </div>
-                  <p className="font-semibold text-slate-900">
-                    Match results will appear here
-                  </p>
-                  <p className="mt-2 max-w-sm text-sm leading-6 text-slate-600">
-                    Pick a resume and paste a job description to calculate your
-                    first ATS match score.
-                  </p>
-                </div>
-              </div>
+              <SkeletonScorePanel />
             )}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function SkeletonScorePanel() {
+  return (
+    <div className="min-h-[560px] rounded-xl border border-slate-200 bg-white p-5">
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+        <div className="h-3 w-40 rounded-full bg-slate-200" />
+        <div className="mt-5 flex items-end gap-3">
+          <div className="h-16 w-24 rounded-xl bg-slate-200" />
+          <div className="h-8 w-8 rounded-lg bg-slate-100" />
+        </div>
+        <div className="mt-4 h-3 w-56 rounded-full bg-slate-100" />
+      </div>
+      <div className="mt-4 space-y-4">
+        {[0, 1, 2].map((item) => (
+          <div key={item} className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+            <div className="h-3 w-32 rounded-full bg-slate-200" />
+            <div className="mt-4 flex flex-wrap gap-2">
+              <div className="h-7 w-24 rounded-full bg-slate-100" />
+              <div className="h-7 w-28 rounded-full bg-slate-100" />
+              <div className="h-7 w-20 rounded-full bg-slate-100" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -230,10 +231,10 @@ function ResultCard({
   const visibleItems = items.length ? items : ["None found"];
   const toneClassName =
     tone === "success"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+      ? "border-green-200 bg-green-50 text-[var(--brand-success)]"
       : tone === "warning"
-        ? "border-amber-200 bg-amber-50 text-amber-800"
-        : "border-blue-200 bg-blue-50 text-blue-800";
+        ? "border-orange-200 bg-orange-50 text-[var(--brand-warning)]"
+        : "border-[var(--brand-accent)] bg-[var(--brand-accent-muted)] text-[var(--brand-primary)]";
 
   return (
     <article className="rounded-xl border border-slate-200 bg-white p-5">
