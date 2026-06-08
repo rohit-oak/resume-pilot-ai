@@ -11,6 +11,20 @@ export function UploadResumeButton() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  async function openFilePicker() {
+    const supabase = createBrowserSupabaseClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.push("/login?reason=personal-resumes");
+      return;
+    }
+
+    fileInputRef.current?.click();
+  }
+
   async function parseResume(file: File) {
     try {
       console.log("[ResumePilot][upload] Calling parse API", {
@@ -80,7 +94,8 @@ export function UploadResumeButton() {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        throw new Error("Sign in before uploading resumes.");
+        router.push("/login?reason=personal-resumes");
+        return;
       }
 
       const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, "-");
@@ -165,7 +180,7 @@ export function UploadResumeButton() {
       <button
         type="button"
         disabled={isUploading}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={openFilePicker}
         className="inline-flex items-center gap-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[rgba(68,55,66,0.22)] transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-[rgba(68,55,66,0.24)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
       >
         <svg

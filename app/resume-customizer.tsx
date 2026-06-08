@@ -18,7 +18,13 @@ type CustomizedResumeResult = {
   tailoringSummary: string[];
 };
 
-export function ResumeCustomizer({ resumes }: { resumes: ResumeOption[] }) {
+export function ResumeCustomizer({
+  resumes,
+  isAuthenticated,
+}: {
+  resumes: ResumeOption[];
+  isAuthenticated: boolean;
+}) {
   const [selectedResumeId, setSelectedResumeId] = useState(resumes[0]?.id || "");
   const [jobDescription, setJobDescription] = useState("");
   const [result, setResult] = useState<CustomizedResumeResult | null>(null);
@@ -31,6 +37,11 @@ export function ResumeCustomizer({ resumes }: { resumes: ResumeOption[] }) {
 
     setMessage(null);
     setError(null);
+
+    if (!isAuthenticated) {
+      window.location.href = "/login?reason=personal-resumes";
+      return;
+    }
 
     if (!selectedResumeId) {
       setError("Select a resume before generating a customized version.");
@@ -139,7 +150,7 @@ export function ResumeCustomizer({ resumes }: { resumes: ResumeOption[] }) {
               </p>
               <button
                 type="button"
-                disabled={isGenerating || !resumes.length}
+                disabled={isGenerating}
                 onClick={generateCustomizedResume}
                 className="inline-flex items-center justify-center rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[rgba(68,55,66,0.22)] transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-[rgba(68,55,66,0.24)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
               >

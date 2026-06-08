@@ -23,6 +23,11 @@ export function ViewResumeButton({ resumeId }: { resumeId: string }) {
         error?: string;
       };
 
+      if (response.status === 401) {
+        window.location.href = "/login?reason=personal-resumes";
+        return;
+      }
+
       if (!response.ok || !payload.signedUrl) {
         throw new Error(payload.error || "Unable to open resume.");
       }

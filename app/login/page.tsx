@@ -2,8 +2,16 @@ import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase";
 import { GoogleSignInButton } from "./google-sign-in-button";
 
-export default async function LoginPage() {
+type LoginPageProps = {
+  searchParams?: Promise<{
+    reason?: string;
+  }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const supabase = await createServerClient();
+  const params = await searchParams;
+  const needsPersonalResumeAccess = params?.reason === "personal-resumes";
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -26,6 +34,12 @@ export default async function LoginPage() {
             Use your Google account to manage resumes, match scores, and tailored
             drafts securely.
           </p>
+          {needsPersonalResumeAccess ? (
+            <div className="mt-5 rounded-xl border border-[var(--brand-accent)] bg-[var(--brand-accent-muted)] px-4 py-3 text-sm leading-6 text-slate-700">
+              Login is required to access personal resumes and protected resume
+              actions.
+            </div>
+          ) : null}
         </div>
         <GoogleSignInButton />
       </section>

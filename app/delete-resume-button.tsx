@@ -44,6 +44,11 @@ export function DeleteResumeButton({
         details?: string;
       };
 
+      if (response.status === 401) {
+        router.push("/login?reason=personal-resumes");
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(
           payload.details

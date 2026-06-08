@@ -16,7 +16,13 @@ type AtsMatchResult = {
   recommendations: string[];
 };
 
-export function AtsMatchScore({ resumes }: { resumes: ResumeOption[] }) {
+export function AtsMatchScore({
+  resumes,
+  isAuthenticated,
+}: {
+  resumes: ResumeOption[];
+  isAuthenticated: boolean;
+}) {
   const [selectedResumeId, setSelectedResumeId] = useState(resumes[0]?.id || "");
   const [jobDescription, setJobDescription] = useState("");
   const [result, setResult] = useState<AtsMatchResult | null>(null);
@@ -27,6 +33,11 @@ export function AtsMatchScore({ resumes }: { resumes: ResumeOption[] }) {
   async function calculateScore() {
     setMessage(null);
     setError(null);
+
+    if (!isAuthenticated) {
+      window.location.href = "/login?reason=personal-resumes";
+      return;
+    }
 
     if (!selectedResumeId) {
       setError("Select a resume before calculating a match score.");
@@ -131,7 +142,7 @@ export function AtsMatchScore({ resumes }: { resumes: ResumeOption[] }) {
 
             <button
               type="button"
-              disabled={isScoring || !resumes.length}
+              disabled={isScoring}
               onClick={calculateScore}
               className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[rgba(68,55,66,0.22)] transition-all hover:scale-[1.01] hover:shadow-xl hover:shadow-[rgba(68,55,66,0.24)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
             >

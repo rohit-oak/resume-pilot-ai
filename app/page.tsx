@@ -7,7 +7,6 @@ import { ResumeCustomizer } from "./resume-customizer";
 import { UploadResumeButton } from "./upload-resume-button";
 import { ViewResumeButton } from "./view-resume-button";
 import { WorkflowOverview } from "./workflow-overview";
-import { redirect } from "next/navigation";
 
 type Resume = {
   id: string;
@@ -21,15 +20,13 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: resumes, error } = await supabase
-    .from("resumes")
-    .select("id, name, file_name")
-    .eq("user_id", user.id)
-    .order("name");
+  const { data: resumes, error } = user
+    ? await supabase
+        .from("resumes")
+        .select("id, name, file_name")
+        .eq("user_id", user.id)
+        .order("name")
+    : { data: [] as Resume[], error: null };
   const resumeOptions = ((resumes || []) as Resume[]).map((resume) => ({
     id: resume.id,
     name: resume.name,
@@ -63,13 +60,24 @@ export default async function Home() {
               Resumes
             </a>
           </div>
-          <a
-            href="#cta"
-            className="rounded-lg bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] px-4 py-2 text-sm font-semibold text-white shadow-md shadow-[rgba(68,55,66,0.22)] transition-all hover:shadow-lg hover:shadow-[rgba(68,55,66,0.24)]"
-          >
-            Get Started
-          </a>
-          <LogoutButton />
+          <div className="flex items-center gap-3">
+            <a
+              href="#cta"
+              className="rounded-lg bg-[var(--brand-primary)] px-4 py-2 text-sm font-semibold text-white shadow-md shadow-[rgba(68,55,66,0.22)] transition-all hover:bg-[var(--brand-primary-hover)] hover:shadow-lg hover:shadow-[rgba(68,55,66,0.24)]"
+            >
+              Get Started
+            </a>
+            {user ? (
+              <LogoutButton />
+            ) : (
+              <a
+                href="/login?reason=personal-resumes"
+                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-[var(--brand-accent)] hover:text-[var(--brand-primary)]"
+              >
+                Login
+              </a>
+            )}
+          </div>
         </nav>
       </header>
 
@@ -238,9 +246,9 @@ export default async function Home() {
 
         <JobDescriptionAnalyzer />
 
-        <AtsMatchScore resumes={resumeOptions} />
+        <AtsMatchScore resumes={resumeOptions} isAuthenticated={Boolean(user)} />
 
-        <ResumeCustomizer resumes={resumeOptions} />
+        <ResumeCustomizer resumes={resumeOptions} isAuthenticated={Boolean(user)} />
 
         {/* Features */}
         <section id="features" className="border-t border-slate-200 bg-white px-6 py-20 md:py-28">
