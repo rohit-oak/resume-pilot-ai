@@ -140,30 +140,20 @@ export default async function Home() {
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-lg border border-[var(--brand-accent)] bg-[var(--brand-accent-muted)]" />
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">
-                          Senior Product Manager
-                        </p>
-                        <p className="text-xs text-slate-500">Acme Corp · Remote</p>
+                        <div className="h-3 w-40 rounded-full bg-slate-200" />
+                        <div className="mt-2 h-2.5 w-28 rounded-full bg-slate-200" />
                       </div>
                     </div>
-                    <div className="rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-[var(--brand-success)]">
-                      92% ATS Match
-                    </div>
+                    <div className="h-8 w-28 rounded-full bg-[var(--brand-accent-muted)]" />
                   </div>
                   <div className="space-y-3">
                     <div className="h-3 w-3/4 rounded-full bg-slate-200" />
                     <div className="h-3 w-full rounded-full bg-slate-200" />
                     <div className="h-3 w-5/6 rounded-full bg-slate-200" />
                     <div className="mt-4 flex gap-2">
-                      <span className="rounded-md bg-[var(--brand-accent-muted)] px-2 py-1 text-xs font-medium text-[var(--brand-primary)]">
-                        Product Strategy
-                      </span>
-                      <span className="rounded-md bg-[var(--brand-accent-muted)] px-2 py-1 text-xs font-medium text-[var(--brand-primary)]">
-                        Agile
-                      </span>
-                      <span className="rounded-md bg-[var(--brand-accent-muted)] px-2 py-1 text-xs font-medium text-[var(--brand-primary)]">
-                        Stakeholder Mgmt
-                      </span>
+                      <span className="h-7 w-32 rounded-md bg-[var(--brand-accent-muted)]" />
+                      <span className="h-7 w-20 rounded-md bg-[var(--brand-accent-muted)]" />
+                      <span className="h-7 w-28 rounded-md bg-[var(--brand-accent-muted)]" />
                     </div>
                   </div>
                 </div>
