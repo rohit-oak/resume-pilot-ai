@@ -182,7 +182,7 @@ function EmptyResultPanel() {
         </svg>
       </div>
       <h3 className="mt-5 text-lg font-semibold text-slate-900">
-        Ready to analyze a job description
+        Analysis results will appear here
       </h3>
       <p className="mt-3 max-w-md text-sm leading-6 text-slate-600">
         Paste a job description and click Analyze JD to extract role, skills,

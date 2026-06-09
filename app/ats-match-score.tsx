@@ -160,7 +160,9 @@ export function AtsMatchScore({
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            {result ? (
+            {isScoring ? (
+              <SkeletonScorePanel />
+            ) : result ? (
               <div className="space-y-4">
                 <div className="rounded-xl border border-slate-200 bg-white p-5">
                   <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
@@ -194,12 +196,47 @@ export function AtsMatchScore({
                 />
               </div>
             ) : (
-              <SkeletonScorePanel />
+              <EmptyScorePanel />
             )}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function EmptyScorePanel() {
+  return (
+    <div className="flex min-h-[560px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-8 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--brand-accent)] bg-[var(--brand-accent-muted)] text-[var(--brand-primary)]">
+        <svg
+          className="h-7 w-7"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.7}
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"
+          />
+        </svg>
+      </div>
+      <h3 className="mt-5 text-lg font-semibold text-slate-900">
+        ATS match results will appear here
+      </h3>
+      <p className="mt-3 max-w-md text-sm leading-6 text-slate-600">
+        Select a resume, paste a job description, and click Calculate Match
+        Score to see matched skills, missing skills, and recommendations.
+      </p>
+      <div className="mt-8 w-full max-w-md space-y-3">
+        <div className="h-3 w-2/3 rounded-full bg-slate-100" />
+        <div className="h-3 w-full rounded-full bg-slate-100" />
+        <div className="h-3 w-5/6 rounded-full bg-slate-100" />
+      </div>
+    </div>
   );
 }
 

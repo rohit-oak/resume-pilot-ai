@@ -171,7 +171,9 @@ export function ResumeCustomizer({
           </div>
 
           <div className="w-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:w-[55%]">
-            {result ? (
+            {isGenerating ? (
+              <SkeletonCustomizerPanel />
+            ) : result ? (
               <div className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <SummaryCard
@@ -224,12 +226,47 @@ export function ResumeCustomizer({
                 </article>
               </div>
             ) : (
-              <SkeletonCustomizerPanel />
+              <EmptyCustomizerPanel />
             )}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function EmptyCustomizerPanel() {
+  return (
+    <div className="flex min-h-[560px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-8 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--brand-accent)] bg-[var(--brand-accent-muted)] text-[var(--brand-primary)]">
+        <svg
+          className="h-7 w-7"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.7}
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14.25v4.5A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H9"
+          />
+        </svg>
+      </div>
+      <h3 className="mt-5 text-lg font-semibold text-slate-900">
+        Tailored resume will appear here
+      </h3>
+      <p className="mt-3 max-w-md text-sm leading-6 text-slate-600">
+        Select a resume, paste a job description, and click Generate Customized
+        Resume to create an ATS-friendly tailored draft.
+      </p>
+      <div className="mt-8 w-full max-w-md space-y-3">
+        <div className="h-3 w-2/3 rounded-full bg-slate-100" />
+        <div className="h-3 w-full rounded-full bg-slate-100" />
+        <div className="h-3 w-5/6 rounded-full bg-slate-100" />
+      </div>
+    </div>
   );
 }
 
