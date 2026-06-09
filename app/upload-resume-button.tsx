@@ -11,22 +11,21 @@ export function UploadResumeButton() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function openFilePicker() {
-    const supabase = createBrowserSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      router.push("/login?reason=personal-resumes");
-      return;
-    }
-
+  function openFilePicker() {
+    console.log("[ResumePilot][upload] File picker opened", {
+      hasInputRef: Boolean(fileInputRef.current),
+    });
     fileInputRef.current?.click();
   }
 
   async function parseResume(file: File) {
     try {
+      console.log("[ResumePilot][upload] Parse started", {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      });
+
       console.log("[ResumePilot][upload] Calling parse API", {
         name: file.name,
         type: file.type,
@@ -66,7 +65,15 @@ export function UploadResumeButton() {
   }
 
   async function uploadResume(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+
+    console.log("[ResumePilot][upload] File selected", {
+      hasFile: Boolean(file),
+      name: file?.name || null,
+      type: file?.type || null,
+      size: file?.size || null,
+    });
 
     if (!file) {
       return;
@@ -80,11 +87,16 @@ export function UploadResumeButton() {
 
     if (!isPdf) {
       setError("Only PDF resumes can be uploaded.");
-      event.target.value = "";
+      input.value = "";
       return;
     }
 
     setIsUploading(true);
+    console.log("[ResumePilot][upload] Upload started", {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
 
     try {
       const supabase = createBrowserSupabaseClient();
@@ -94,6 +106,10 @@ export function UploadResumeButton() {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
+        console.error("[ResumePilot][upload] Upload blocked: missing session", {
+          hasUser: Boolean(user),
+          userError,
+        });
         router.push("/login?reason=personal-resumes");
         return;
       }
@@ -122,6 +138,9 @@ export function UploadResumeButton() {
       }
 
       console.log("[ResumePilot][upload] Storage upload succeeded", {
+        storagePath,
+      });
+      console.log("[ResumePilot][upload] Storage upload completed", {
         storagePath,
       });
 
@@ -155,6 +174,10 @@ export function UploadResumeButton() {
         id: insertedResume?.id,
         storedParsedTextLength: insertedResume?.parsed_text?.length || 0,
       });
+      console.log("[ResumePilot][upload] Database insert completed", {
+        id: insertedResume?.id,
+        storedParsedTextLength: insertedResume?.parsed_text?.length || 0,
+      });
 
       setMessage("Resume uploaded successfully.");
       router.refresh();
@@ -164,7 +187,7 @@ export function UploadResumeButton() {
       setError(uploadMessage);
     } finally {
       setIsUploading(false);
-      event.target.value = "";
+      input.value = "";
     }
   }
 
