@@ -135,7 +135,9 @@ export function JobDescriptionAnalyzer() {
           </div>
 
           <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:w-[55%]">
-            {hasAnalysis ? (
+            {isAnalyzing ? (
+              <SkeletonResultPanel />
+            ) : hasAnalysis ? (
               <div className="space-y-4">
                 <AnalysisCard title="Role Title" items={[analysis.roleTitle]} />
                 <AnalysisCard title="Required Skills" items={analysis.requiredSkills} />
@@ -151,7 +153,7 @@ export function JobDescriptionAnalyzer() {
                 />
               </div>
             ) : (
-              <SkeletonResultPanel title="JD analysis preview" />
+              <EmptyResultPanel />
             )}
           </div>
         </div>
@@ -160,14 +162,49 @@ export function JobDescriptionAnalyzer() {
   );
 }
 
-function SkeletonResultPanel({ title }: { title: string }) {
+function EmptyResultPanel() {
+  return (
+    <div className="flex min-h-[520px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-8 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--brand-accent)] bg-[var(--brand-accent-muted)] text-[var(--brand-primary)]">
+        <svg
+          className="h-7 w-7"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.7}
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 12 3 3m0 0 3-3m-3 3V9.75M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+          />
+        </svg>
+      </div>
+      <h3 className="mt-5 text-lg font-semibold text-slate-900">
+        Ready to analyze a job description
+      </h3>
+      <p className="mt-3 max-w-md text-sm leading-6 text-slate-600">
+        Paste a job description and click Analyze JD to extract role, skills,
+        keywords, responsibilities, and experience requirements.
+      </p>
+      <div className="mt-8 w-full max-w-md space-y-3">
+        <div className="h-3 w-2/3 rounded-full bg-slate-100" />
+        <div className="h-3 w-full rounded-full bg-slate-100" />
+        <div className="h-3 w-5/6 rounded-full bg-slate-100" />
+      </div>
+    </div>
+  );
+}
+
+function SkeletonResultPanel() {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex items-center justify-between border-b border-slate-200 pb-4">
         <div>
-          <p className="text-sm font-semibold text-slate-900">{title}</p>
+          <p className="text-sm font-semibold text-slate-900">Analyzing job description</p>
           <p className="mt-1 text-xs text-slate-500">
-            Results populate here after analysis.
+            Extracting role signals, skills, keywords, and requirements.
           </p>
         </div>
         <div className="h-9 w-9 rounded-lg bg-[var(--brand-accent-muted)]" />
