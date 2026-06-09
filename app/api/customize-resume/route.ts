@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
+import { generateGeminiJson, logGeminiModel } from "@/lib/gemini";
 
 type JobDescriptionAnalysis = {
   roleTitle: string;
@@ -8,21 +9,6 @@ type JobDescriptionAnalysis = {
   keywords: string[];
   experienceRequirements: string[];
   responsibilities: string[];
-};
-
-type GeminiPart = {
-  text?: string;
-};
-
-type GeminiResponse = {
-  candidates?: Array<{
-    content?: {
-      parts?: GeminiPart[];
-    };
-  }>;
-  error?: {
-    message?: string;
-  };
 };
 
 const analysisSchema = {
@@ -120,69 +106,18 @@ function scoreTerms(resumeText: string, terms: string[]) {
   };
 }
 
-async function callGemini(prompt: string, responseSchema: object) {
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("Missing GEMINI_API_KEY environment variable.");
-  }
-
-  const model = process.env.GEMINI_MODEL || "gemini-3.5-flash";
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: prompt }],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.25,
-          response_mime_type: "application/json",
-          response_schema: responseSchema,
-        },
-      }),
-    },
-  );
-
-  const body = (await response.json().catch(() => null)) as GeminiResponse | null;
-
-  if (!response.ok) {
-    throw new Error(
-      body?.error?.message || "Gemini could not complete the request.",
-    );
-  }
-
-  const text = body?.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text || "")
-    .join("")
-    .trim();
-
-  if (!text) {
-    throw new Error("Gemini returned an empty response.");
-  }
-
-  return JSON.parse(text) as unknown;
-}
-
 async function analyzeJobDescription(jobDescription: string) {
-  const response = await callGemini(
-    [
+  const response = await generateGeminiJson({
+    prompt: [
       "Analyze this job description for resume customization.",
       "Return only JSON matching the provided schema.",
       "Keep skills and keywords concise, specific, and deduplicated.",
       "",
       jobDescription,
     ].join("\n"),
-    analysisSchema,
-  );
+    responseSchema: analysisSchema,
+    temperature: 0.25,
+  });
 
   return normalizeAnalysis(response);
 }
@@ -241,8 +176,8 @@ async function customizeResume({
   matchedSkills: string[];
   missingSkills: string[];
 }) {
-  const response = await callGemini(
-    [
+  const response = await generateGeminiJson({
+    prompt: [
       "Create an ATS-friendly customized resume from the provided parsed resume text.",
       "Preserve factual experience. Do not invent employers, titles, dates, degrees, certifications, tools, metrics, or responsibilities that are not supported by the resume text.",
       "Improve keyword coverage only where the resume text supports it.",
@@ -263,8 +198,9 @@ async function customizeResume({
       "Parsed resume text:",
       resumeText,
     ].join("\n"),
-    customizedResumeSchema,
-  );
+    responseSchema: customizedResumeSchema,
+    temperature: 0.25,
+  });
 
   const customized = normalizeCustomizedResume(response);
 
@@ -277,6 +213,8 @@ async function customizeResume({
 
 export async function POST(request: Request) {
   try {
+    logGeminiModel();
+
     const body = (await request.json().catch(() => null)) as
       | { resumeId?: string; jobDescription?: string }
       | null;

@@ -1,20 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
-
-type GeminiPart = {
-  text?: string;
-};
-
-type GeminiResponse = {
-  candidates?: Array<{
-    content?: {
-      parts?: GeminiPart[];
-    };
-  }>;
-  error?: {
-    message?: string;
-  };
-};
+import { generateGeminiJson, logGeminiModel } from "@/lib/gemini";
 
 type JobDescriptionAnalysis = {
   roleTitle: string;
@@ -82,6 +68,8 @@ function normalizeAnalysis(value: unknown): JobDescriptionAnalysis {
 }
 
 export async function POST(request: Request) {
+  logGeminiModel();
+
   const supabase = await createServerClient();
   const {
     data: { user },
@@ -91,15 +79,6 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "Authentication required." },
       { status: 401 },
-    );
-  }
-
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "Missing GEMINI_API_KEY environment variable." },
-      { status: 500 },
     );
   }
 
@@ -123,76 +102,31 @@ export async function POST(request: Request) {
     );
   }
 
-  const model = process.env.GEMINI_MODEL || "gemini-3.5-flash";
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: [
-                  "Analyze this job description for resume tailoring.",
-                  "Return only JSON matching the provided schema.",
-                  "Keep items concise, specific, and useful for ATS matching.",
-                  "",
-                  jobDescription,
-                ].join("\n"),
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2,
-          response_mime_type: "application/json",
-          response_schema: analysisSchema,
-        },
-      }),
-    },
-  );
-
-  const geminiResponse = (await response.json().catch(() => null)) as
-    | GeminiResponse
-    | null;
-
-  if (!response.ok) {
-    return NextResponse.json(
-      {
-        error:
-          geminiResponse?.error?.message ||
-          "Gemini could not analyze the job description.",
-      },
-      { status: response.status },
-    );
-  }
-
-  const text = geminiResponse?.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text || "")
-    .join("")
-    .trim();
-
-  if (!text) {
-    return NextResponse.json(
-      { error: "Gemini returned an empty analysis." },
-      { status: 502 },
-    );
-  }
-
   try {
-    return NextResponse.json({
-      analysis: normalizeAnalysis(JSON.parse(text)),
+    const analysis = await generateGeminiJson({
+      prompt: [
+        "Analyze this job description for resume tailoring.",
+        "Return only JSON matching the provided schema.",
+        "Keep items concise, specific, and useful for ATS matching.",
+        "",
+        jobDescription,
+      ].join("\n"),
+      responseSchema: analysisSchema,
+      temperature: 0.2,
     });
-  } catch {
+
+    return NextResponse.json({
+      analysis: normalizeAnalysis(analysis),
+    });
+  } catch (reason) {
+    const message =
+      reason instanceof Error
+        ? reason.message
+        : "Gemini could not analyze the job description.";
+
     return NextResponse.json(
-      { error: "Gemini returned invalid JSON." },
-      { status: 502 },
+      { error: message },
+      { status: 500 },
     );
   }
 }
