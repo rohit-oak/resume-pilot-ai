@@ -4,7 +4,11 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase-browser";
 
-export function UploadResumeButton() {
+export function UploadResumeButton({
+  isAuthenticated,
+}: {
+  isAuthenticated: boolean;
+}) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -12,6 +16,12 @@ export function UploadResumeButton() {
   const [error, setError] = useState<string | null>(null);
 
   function openFilePicker() {
+    if (!isAuthenticated) {
+      console.log("[ResumePilot][upload] File picker blocked: login required");
+      router.push("/login?reason=personal-resumes");
+      return;
+    }
+
     console.log("[ResumePilot][upload] File picker opened", {
       hasInputRef: Boolean(fileInputRef.current),
     });

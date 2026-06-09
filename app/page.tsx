@@ -187,7 +187,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <UploadResumeButton />
+            <UploadResumeButton isAuthenticated={Boolean(user)} />
 
             {error ? (
               <div className="mx-auto mt-12 max-w-lg rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-700">
