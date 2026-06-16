@@ -71,7 +71,7 @@ export async function generateGeminiJson({
   logGeminiModel();
 
   const model = getGeminiModel();
-  let lastErrorMessage = "Gemini could not complete the request.";
+  let lastErrorMessage = "The AI model could not complete the request.";
 
   for (let attemptIndex = 0; attemptIndex < RETRY_DELAYS_MS.length; attemptIndex += 1) {
     const attempt = attemptIndex + 1;
@@ -112,7 +112,7 @@ export async function generateGeminiJson({
 
     const body = (await response.json().catch(() => null)) as GeminiResponse | null;
     const errorMessage =
-      body?.error?.message || "Gemini could not complete the request.";
+      body?.error?.message || "The AI model could not complete the request.";
 
     if (!response.ok) {
       lastErrorMessage = errorMessage;
@@ -139,7 +139,7 @@ export async function generateGeminiJson({
       .trim();
 
     if (!text) {
-      throw new Error("Gemini returned an empty response.");
+      throw new Error("The AI model returned an empty response.");
     }
 
     return JSON.parse(text) as unknown;

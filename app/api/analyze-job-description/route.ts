@@ -122,7 +122,7 @@ export async function POST(request: Request) {
     const message =
       reason instanceof Error
         ? reason.message
-        : "Gemini could not analyze the job description.";
+        : "The AI model could not analyze the job description.";
 
     return NextResponse.json(
       { error: message },

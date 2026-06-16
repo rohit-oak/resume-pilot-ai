@@ -213,7 +213,7 @@ async function customizeResume({
   const customized = normalizeCustomizedResume(response);
 
   if (!customized.tailoredResumeText) {
-    throw new Error("Gemini returned an empty customized resume.");
+    throw new Error("The AI model returned an empty customized resume.");
   }
 
   return customized;
