@@ -178,10 +178,18 @@ async function customizeResume({
 }) {
   const response = await generateGeminiJson({
     prompt: [
-      "Create an ATS-friendly customized resume from the provided parsed resume text.",
-      "Preserve factual experience. Do not invent employers, titles, dates, degrees, certifications, tools, metrics, or responsibilities that are not supported by the resume text.",
+      "Create an ATS-friendly customized resume from the provided parsed resume text, but treat customization as enhancement, not rewriting.",
+      "The customized resume must preserve the candidate's professional identity and original positioning.",
+      "Preserve at least 90% of the original resume content and structure.",
+      "Do NOT change employers, job titles, dates, education, certifications, or projects.",
+      "Do NOT invent responsibilities, achievements, tools, metrics, technologies, employers, titles, dates, degrees, certifications, or projects that are not explicitly supported by the resume text.",
+      "Optimize only the professional summary, skills ordering, bullet wording, and natural keyword placement.",
+      "Keep the candidate's existing professional positioning. For example, if the resume says Enterprise Automation Engineer, do not turn the candidate into a Senior Digital Project Manager.",
+      "If the job description is for an adjacent role, enhance the candidate's existing automation and delivery experience using relevant supported keywords instead of changing their identity.",
       "Improve keyword coverage only where the resume text supports it.",
-      "Highlight relevant skills and experience for the target job description.",
+      "Avoid keyword stuffing, unnatural repetition, and over-injection of ATS terms.",
+      "The final resume must feel human-written and believable if reviewed by the candidate's current manager.",
+      "Highlight relevant skills and experience for the target job description without changing factual meaning.",
       "Use clean plain-text resume formatting with clear section headings and concise bullets.",
       "Return only JSON matching the provided schema.",
       "",
