@@ -29,6 +29,7 @@ export function ResumeCustomizer({
   const [jobDescription, setJobDescription] = useState("");
   const [result, setResult] = useState<CustomizedResumeResult | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,6 +83,64 @@ export function ResumeCustomizer({
       setError(customizeMessage);
     } finally {
       setIsGenerating(false);
+    }
+  }
+
+  async function downloadPdf() {
+    if (!result) {
+      return;
+    }
+
+    setMessage(null);
+    setError(null);
+    setIsExportingPdf(true);
+
+    try {
+      const response = await fetch("/api/export-resume-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          resumeName: result.resumeName,
+          tailoredResumeText: result.tailoredResumeText,
+        }),
+      });
+
+      if (response.status === 401) {
+        window.location.href = "/login?reason=personal-resumes";
+        return;
+      }
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+
+        throw new Error(payload?.error || "Unable to export resume PDF.");
+      }
+
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get("Content-Disposition") || "";
+      const fileNameMatch = contentDisposition.match(/filename="([^"]+)"/);
+      const fileName =
+        fileNameMatch?.[1] || `${result.resumeName.replace(/[^a-zA-Z0-9]+/g, "_")}_Customized.pdf`;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setMessage("PDF downloaded successfully.");
+    } catch (reason) {
+      const exportMessage =
+        reason instanceof Error ? reason.message : "Unable to export resume PDF.";
+      setError(exportMessage);
+    } finally {
+      setIsExportingPdf(false);
     }
   }
 
@@ -208,15 +267,25 @@ export function ResumeCustomizer({
                     <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
                       Tailored Resume Text
                     </h3>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        navigator.clipboard.writeText(result.tailoredResumeText)
-                      }
-                      className="inline-flex items-center justify-center rounded-lg border border-[var(--brand-accent)] bg-white px-3 py-2 text-sm font-semibold text-[var(--brand-primary)] transition-colors hover:border-[var(--brand-accent)] hover:bg-[var(--brand-accent-muted)]"
-                    >
-                      Copy Text
-                    </button>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigator.clipboard.writeText(result.tailoredResumeText)
+                        }
+                        className="inline-flex items-center justify-center rounded-lg border border-[var(--brand-accent)] bg-white px-3 py-2 text-sm font-semibold text-[var(--brand-primary)] transition-colors hover:border-[var(--brand-accent)] hover:bg-[var(--brand-accent-muted)]"
+                      >
+                        Copy Text
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isExportingPdf}
+                        onClick={downloadPdf}
+                        className="inline-flex items-center justify-center rounded-lg bg-[var(--brand-primary)] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-primary-hover)] disabled:cursor-not-allowed disabled:opacity-70"
+                      >
+                        {isExportingPdf ? "Downloading..." : "Download PDF"}
+                      </button>
+                    </div>
                   </div>
                   <textarea
                     readOnly
